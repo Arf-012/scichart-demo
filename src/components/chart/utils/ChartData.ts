@@ -6,7 +6,7 @@ import {
   AnnotationBase,
   LineAnnotation,
 } from "scichart";
-import { TPriceBar } from "../../../services/binanceRestClient";
+import { TPriceBar } from "../../../types/types";
 import { appTheme } from "../../../styles/theme";
 
 export const updateLatestPriceAnnotation = (
