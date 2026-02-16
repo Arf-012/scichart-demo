@@ -1,104 +1,12 @@
 import * as React from "react";
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import commonClasses from "./styles/Examples.module.scss";
-import { createCandlestickChart } from "./components/chart/createCandlestickChart";
 import { SciChartReact, TResolvedReturnType } from "scichart-react";
-import {
-  binanceSocketClient,
-  TRealtimePriceBar,
-} from "./services/binanceSocketClient";
-import { Observable, Subscription } from "rxjs";
-import {
-  simpleBinanceRestClient,
-  TPriceBar,
-} from "./services/binanceRestClient";
 import { appTheme } from "./styles/theme";
-import { ExampleDataProvider } from "./services/ExampleDataProvider";
 import { ChartToolbar } from "./components/ui/ChartToolbar";
-
-// SCICHART EXAMPLE
-// const drawExample = async (rootElement: string | HTMLDivElement) => {
-//     const { sciChartSurface, sciChartOverview, controls } = await createCandlestickChart(rootElement);
-export const drawExample =
-  (dataSource: string) => async (rootElement: string | HTMLDivElement) => {
-    // Create the candlestick chart example. Contains Candlestick series, tooltips, volume, zooming panning behaviour and more
-    const { sciChartSurface, controls } =
-      await createCandlestickChart(rootElement);
-
-    const endDate = new Date(Date.now());
-    const startDate = new Date();
-    startDate.setMinutes(endDate.getMinutes() - 300);
-
-    let priceBars: TPriceBar[];
-    if (dataSource !== "Random") {
-      priceBars = await simpleBinanceRestClient.getCandles(
-        "BTCUSDT",
-        "1m",
-        startDate,
-        endDate,
-        500,
-        dataSource,
-      );
-      // Set the candles data on the chart
-      controls.setData("BTC/USDT", priceBars);
-    } else {
-      priceBars = ExampleDataProvider.getRandomCandles(
-        300,
-        60000,
-        startDate,
-        60,
-      );
-      controls.setData("Random", priceBars);
-    }
-
-    const startViewportRange = new Date();
-    startViewportRange.setMinutes(endDate.getMinutes() - 100);
-    endDate.setMinutes(endDate.getMinutes() + 10);
-    controls.setXRange(startViewportRange, endDate);
-
-    // Susbscribe to price updates from the exchange
-    let obs: Observable<TRealtimePriceBar>;
-    if (dataSource !== "Random") {
-      obs = binanceSocketClient.getRealtimeCandleStream("BTCUSDT", "1m");
-    } else {
-      const lastBar = priceBars[priceBars.length - 1];
-      const startBar: TRealtimePriceBar = {
-        symbol: "Random",
-        close: lastBar.close,
-        high: lastBar.high,
-        low: lastBar.low,
-        volume: lastBar.volume,
-        eventTime: new Date().getTime(),
-        open: lastBar.open,
-        openTime: lastBar.date * 1000,
-        closeTime: (lastBar.date + 60) * 1000,
-        interval: "1m",
-        lastTradeSize: 0,
-        lastTradeBuyOrSell: false,
-      };
-      obs = binanceSocketClient.getRandomCandleStream(startBar, 60000);
-    }
-    const subscription = obs.subscribe((pb) => {
-      const priceBar = {
-        date: pb.openTime,
-        open: pb.open,
-        high: pb.high,
-        low: pb.low,
-        close: pb.close,
-        volume: pb.volume,
-      };
-      controls.onNewTrade(priceBar, pb.lastTradeSize, pb.lastTradeBuyOrSell);
-    });
-
-    return { sciChartSurface, subscription, controls };
-  };
+import { CHART_PROVIDERS } from "./services/ChartProviders";
+import { createChartInitializer } from "./components/chart/ChartInitialization";
+import { TPriceBar } from "./types/types";
 
 export default function RealtimeTickingStockCharts() {
   const chartControlsRef = React.useRef<{
@@ -114,11 +22,11 @@ export default function RealtimeTickingStockCharts() {
     addBoxAnnotation: () => void;
     deleteSelectedAnnotations: () => void;
   }>(undefined);
-  const [dataSource, setDataSource] = React.useState<string>("Random");
+  const [providerId, setProviderId] = React.useState<string>("random");
   const [activeTool, setActiveTool] = React.useState<string>("pan");
 
-  const handleDataSourceChanged = (event: any) => {
-    setDataSource(event.target.value);
+  const handleProviderChanged = (event: any) => {
+    setProviderId(event.target.value);
   };
 
   const handleToolChange = (tool: string) => {
@@ -128,7 +36,7 @@ export default function RealtimeTickingStockCharts() {
     }
   };
 
-  const initFunc = drawExample(dataSource);
+  const initFunc = createChartInitializer(providerId);
 
   return (
     <div
@@ -144,7 +52,7 @@ export default function RealtimeTickingStockCharts() {
         className={commonClasses.ToolbarRow}
         style={{ flex: "none", borderBottom: "1px solid #2B2B43" }}
       >
-        <FormControl sx={{ m: 1, minWidth: 120 }}>
+        <FormControl sx={{ m: 1, minWidth: 150 }}>
           <InputLabel
             id="data-source-label"
             sx={{ color: appTheme.VividGreen }}
@@ -163,20 +71,30 @@ export default function RealtimeTickingStockCharts() {
             size="small"
             inputProps={{
               MenuProps: { disableScrollLock: true },
-              "aria-label": "Without label",
             }}
-            value={dataSource}
-            onChange={handleDataSourceChanged}
+            value={providerId}
+            onChange={handleProviderChanged}
           >
-            <MenuItem value={"Random"}>Random</MenuItem>
-            <MenuItem value={"com"}>Binance.com</MenuItem>
+            {Object.values(CHART_PROVIDERS).map((prov) => (
+              <MenuItem key={prov.id} value={prov.id}>
+                {prov.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", height: "100dvh", width: "100%", overflow: "hidden" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100dvh",
+          width: "100%",
+          overflow: "hidden",
+        }}
+      >
         <SciChartReact
-          key={dataSource}
+          key={providerId}
           initChart={initFunc}
           onInit={(initResult: TResolvedReturnType<typeof initFunc>) => {
             const { subscription, controls } = initResult;
@@ -193,21 +111,21 @@ export default function RealtimeTickingStockCharts() {
             width: "100%",
             flex: 1,
             minHeight: 0,
-            height: "100%", 
+            height: "100%",
           }}
           innerContainerProps={{
             style: { width: "100%", height: "100%" },
           }}
         />
-          <ChartToolbar
-            activeTool={activeTool}
-            onToolChange={handleToolChange}
-            onAddLine={() => chartControlsRef.current?.addLineAnnotation()}
-            onAddBox={() => chartControlsRef.current?.addBoxAnnotation()}
-            onDeleteSelected={() =>
-              chartControlsRef.current?.deleteSelectedAnnotations()
-            }
-          />
+        <ChartToolbar
+          activeTool={activeTool}
+          onToolChange={handleToolChange}
+          onAddLine={() => chartControlsRef.current?.addLineAnnotation()}
+          onAddBox={() => chartControlsRef.current?.addBoxAnnotation()}
+          onDeleteSelected={() =>
+            chartControlsRef.current?.deleteSelectedAnnotations()
+          }
+        />
       </div>
     </div>
   );
