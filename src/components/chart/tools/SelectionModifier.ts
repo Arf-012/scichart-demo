@@ -11,9 +11,9 @@ import {
   EHorizontalAnchorPoint,
   EVerticalAnchorPoint,
 } from "scichart";
-import { appTheme } from "../../styles/theme";
-import { calculateStats } from "./utils/ChartStats";
-import { getStatsTooltipSvg } from "./templates/statsTooltip";
+import { appTheme } from "../../../styles/theme";
+import { calculateStats } from "../utils/ChartStats";
+import { getStatsTooltipSvg } from "../templates/statsTooltip";
 
 export class SelectionModifier extends ChartModifierBase2D {
   public type = "SelectionModifier";
@@ -28,18 +28,10 @@ export class SelectionModifier extends ChartModifierBase2D {
   public modifierMouseDown(args: ModifierMouseArgs): void {
     super.modifierMouseDown(args);
 
-    // Allow Left Click, Right Click, or Touch (simulated as Left)
-    // If this modifier is disabled by parent, this won't even fire or can be guarded.
-    // The parent 'createCandlestickChart' manages isEnabled.
     if (this.isEnabled) {
-      // Just check if it's a valid interaction for selection (e.g. not right dragging if we want left)
-      // For simplicity, let's allow any button if the tool is explicitly selected.
-      // But usually left drag is standard for tools.
-
       this.startPoint = args.mousePoint;
       this.clearSelection();
 
-      // BoxAnnotation
       this.activeBox = new BoxAnnotation({
         xCoordinateMode: ECoordinateMode.Pixel,
         yCoordinateMode: ECoordinateMode.Pixel,
@@ -113,34 +105,13 @@ export class SelectionModifier extends ChartModifierBase2D {
           Math.pow(args.mousePoint.y - this.startPoint.y, 2),
       );
 
-      // Handle Tap / Click
-      // Increased threshold for mobile touch accuracy
       if (dist < 20 && this.activeBox) {
-        // It was a tap. Clear previous box if we were dragging, but here we want to select the candle.
-        // Actually, if we just tapped, activeBox was created in MouseDown as a 0-size box and didn't expand much.
-        // We can use the current mouse point to find the candle.
-        this.parentSurface.annotations.remove(this.activeBox); // Remove the tiny box
-
-        // Create a selection details for the single point
-        // We want to calculate stats/tooltip for the candle at this X
+        this.parentSurface.annotations.remove(this.activeBox);
         const xCalc = this.parentSurface.xAxes
           .get(0)
           .getCurrentCoordinateCalculator();
-        //  const yCalc = this.parentSurface.yAxes.get(0).getCurrentCoordinateCalculator();
 
         const xVal = xCalc.getDataValue(args.mousePoint.x);
-        // Find the nearest candle index?
-        // For now, let's just make a small range around the tap to simulate a "selection" of that area or just the single index.
-        // Better: Use hit test or just assume the X coordinate maps to a candle.
-
-        // For now, allow "Click to Clear" if we already had a selection?
-        // Or "Click to Select". simpler: Treat tap as selecting a small region or just showing info.
-        // Logic: If we tapped, maybe we want to show the tooltip for that X.
-        // Let's create a 1-pixel wide box or reusing updateTooltip logic with a single point?
-        // updateTooltip takes x1, x2...
-
-        // Let's look at updateTooltip. It calculates stats between x1 and x2.
-        // If x1 ~= x2, it might pick up one candle.
         this.updateTooltip(
           args.mousePoint.x,
           args.mousePoint.x,
@@ -150,13 +121,7 @@ export class SelectionModifier extends ChartModifierBase2D {
           args.mousePoint.y,
         );
 
-        // We might want to persist this tooltip. Currently updateTooltip adds it.
-        // But we need to distinguish "dragged box" vs "tapped point".
-        // Use a marker? For now, let's see if updateTooltip works for single point.
       } else if (this.activeBox) {
-        // Dragged
-        // ... (Existing logic for proper box selection)
-
         const xCalc = this.parentSurface.xAxes
           .get(0)
           .getCurrentCoordinateCalculator();

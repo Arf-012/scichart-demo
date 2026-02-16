@@ -1,20 +1,15 @@
 {
-  "include": [
-    "./src/**/*",
-    "./vite.config.ts"
-  ],
-"compilerOptions": {
-  "strict": false,
-  "strictPropertyInitialization": false,
-  "esModuleInterop": true,
-      "target": "es5",
+  "include": ["./src/**/*", "./vite.config.ts"],
+  "compilerOptions": {
+    "strict": false,
+    "strictPropertyInitialization": false,
+    "esModuleInterop": true,
+    "target": "es5",
     "moduleResolution": "node",
-  "downlevelIteration": true,
-  "lib": [
-      "dom",
-      "es2015"
-  ],
-  "typeRoots": ["./src/types", "./node_modules/@types"],
-  "jsx": "react-jsx"
-}
+    "downlevelIteration": true,
+    "lib": ["dom", "es2015"],
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "jsx": "react-jsx",
+    "types": ["vite-plugin-pwa/client", "vite-plugin-pwa/react"]
+  }
 }

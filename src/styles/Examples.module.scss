@@ -58,6 +58,10 @@ html {
     // @include sm { // maybe someday
     //     aspect-ratio: 9 / 16;
     // }
+
+    @media (max-width: 600px) {
+        padding-bottom: 60px; // Space for the fixed bottom toolbar
+    }
 }
 
 .ChartWithToolbar {

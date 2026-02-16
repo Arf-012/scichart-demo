@@ -16,7 +16,6 @@ export const configureSeries = (
 
   const candlestickSeries = new FastCandlestickRenderableSeries(wasmContext, {
     dataSeries: candleDataSeries,
-    stroke: appTheme.ForegroundColor,
     strokeThickness: 1,
     brushUp: appTheme.TV_Green,
     brushDown: appTheme.TV_Red,

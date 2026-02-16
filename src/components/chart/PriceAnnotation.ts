@@ -1,8 +1,7 @@
 import { SciChartSurface, HorizontalLineAnnotation } from "scichart";
 import { appTheme } from "../../styles/theme";
 
-export const configureAnnotations = (sciChartSurface: SciChartSurface) => {
-  // Add a vertical line annotation at the latest price
+export const PriceAnnotation = (sciChartSurface: SciChartSurface) => {
   const latestPriceAnnotation = new HorizontalLineAnnotation({
     isHidden: true,
     strokeDashArray: [2, 2],

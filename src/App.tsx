@@ -110,6 +110,9 @@ export default function RealtimeTickingStockCharts() {
     ) => void;
     setXRange: (startDate: Date, endDate: Date) => void;
     setTool: (tool: string) => void;
+    addLineAnnotation: () => void;
+    addBoxAnnotation: () => void;
+    deleteSelectedAnnotations: () => void;
   }>(undefined);
   const [dataSource, setDataSource] = React.useState<string>("Random");
   const [activeTool, setActiveTool] = React.useState<string>("pan");
@@ -133,13 +136,15 @@ export default function RealtimeTickingStockCharts() {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        height: "100dvh",
         width: "100%",
-        overflow: "hidden",
       }}
     >
-      <div className={commonClasses.ToolbarRow} style={{ flex: "none" }}>
-        <FormControl sx={{ marginTop: "1em" }}>
+      <div
+        className={commonClasses.ToolbarRow}
+        style={{ flex: "none", borderBottom: "1px solid #2B2B43" }}
+      >
+        <FormControl sx={{ m: 1, minWidth: 120 }}>
           <InputLabel
             id="data-source-label"
             sx={{ color: appTheme.VividGreen }}
@@ -169,30 +174,41 @@ export default function RealtimeTickingStockCharts() {
         </FormControl>
       </div>
 
-      <SciChartReact
-        key={dataSource}
-        initChart={initFunc}
-        onInit={(initResult: TResolvedReturnType<typeof initFunc>) => {
-          const { subscription, controls } = initResult;
-          chartControlsRef.current = controls;
-          // Apply initial tool
-          controls.setTool(activeTool);
+      <div style={{ display: "flex", flexDirection: "column", height: "100dvh", width: "100%", overflow: "hidden" }}>
+        <SciChartReact
+          key={dataSource}
+          initChart={initFunc}
+          onInit={(initResult: TResolvedReturnType<typeof initFunc>) => {
+            const { subscription, controls } = initResult;
+            chartControlsRef.current = controls;
+            controls.setTool(activeTool);
 
-          return () => {
-            subscription.unsubscribe();
-          };
-        }}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          flex: "auto",
-        }}
-        innerContainerProps={{
-          style: { flexBasis: "100%", flexGrow: 1, flexShrink: 1 },
-        }}
-      />
-      <ChartToolbar activeTool={activeTool} onToolChange={handleToolChange} />
+            return () => {
+              subscription.unsubscribe();
+            };
+          }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            flex: 1,
+            minHeight: 0,
+            height: "100%", 
+          }}
+          innerContainerProps={{
+            style: { width: "100%", height: "100%" },
+          }}
+        />
+          <ChartToolbar
+            activeTool={activeTool}
+            onToolChange={handleToolChange}
+            onAddLine={() => chartControlsRef.current?.addLineAnnotation()}
+            onAddBox={() => chartControlsRef.current?.addBoxAnnotation()}
+            onDeleteSelected={() =>
+              chartControlsRef.current?.deleteSelectedAnnotations()
+            }
+          />
+      </div>
     </div>
   );
 }

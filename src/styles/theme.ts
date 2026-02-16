@@ -75,11 +75,12 @@ export class SciChart2022AppTheme implements AppThemeBase {
   get TradingViewTheme(): IThemeProvider {
     const theme = new SciChartJsNavyTheme();
     theme.sciChartBackground = this.TV_Background;
+    theme.loadingAnimationBackground = this.TV_Background;
     theme.gridBackgroundBrush = this.TV_Background;
     theme.majorGridLineBrush = this.TV_Grid;
-    theme.minorGridLineBrush = "Transparent";
-    theme.axisBorder = this.TV_Grid;
-    theme.tickTextBrush = this.ForegroundColor;
+    theme.minorGridLineBrush = this.TV_Grid;
+    theme.axisBorder = "Transparent";
+    theme.tickTextBrush = "#787B86"; // TradingView specific axis label color
     return theme;
   }
 }
