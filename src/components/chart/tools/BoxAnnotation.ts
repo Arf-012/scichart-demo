@@ -2,19 +2,20 @@ import {
   SciChartSurface,
   AxisBase2D,
   BoxAnnotation,
+  AxisMarkerAnnotation,
   ECoordinateMode,
   EAnnotationLayer,
-  OhlcDataSeries,
 } from "scichart";
 import { appTheme } from "../../../styles/theme";
 import { calculateCenter } from "../../../utils/calculateCenter";
-import { attachStatsTooltip } from "../utils/TooltipBehavior";
+import { formatDate, formatPrice } from "../../../utils/formatters";
 
 export const addBoxAnnotation = (
   sciChartSurface: SciChartSurface,
   xAxis: AxisBase2D,
 ) => {
   const yAxis = sciChartSurface.yAxes.get(0);
+
   const xRange = xAxis.visibleRange;
   const yRange = yAxis.visibleRange;
 
@@ -34,12 +35,63 @@ export const addBoxAnnotation = (
     annotationLayer: EAnnotationLayer.AboveChart,
   });
 
+  /* Helper to create axis markers */
+  const createAxisMarker = (
+    value: number,
+    formatFunc: (v: number) => string,
+  ) => {
+    return new AxisMarkerAnnotation({
+      fontSize: 10,
+      backgroundColor: appTheme.MutedBlue,
+      color: appTheme.TV_Background,
+      formattedValue: formatFunc(value),
+    });
+  };
+
+  const y1Marker = createAxisMarker(y1, formatPrice);
+  const y2Marker = createAxisMarker(y2, formatPrice);
+  const x1Marker = createAxisMarker(x1, formatDate);
+  const x2Marker = createAxisMarker(x2, formatDate);
+
+  const updateMarkers = () => {
+    y1Marker.y1 = boxAnnotation.y1;
+    y1Marker.formattedValue = formatPrice(boxAnnotation.y1);
+
+    y2Marker.y1 = boxAnnotation.y2;
+    y2Marker.formattedValue = formatPrice(boxAnnotation.y2);
+
+    x1Marker.x1 = boxAnnotation.x1;
+    x1Marker.formattedValue = formatDate(boxAnnotation.x1);
+
+    x2Marker.x1 = boxAnnotation.x2;
+    x2Marker.formattedValue = formatDate(boxAnnotation.x2);
+  };
+
+  const onSelected = () => {
+    const markers = (boxAnnotation as any).markers as AxisMarkerAnnotation[];
+    if (markers) {
+      markers.forEach((m) => (m.isHidden = !boxAnnotation.isSelected));
+    }
+  };
+
+  boxAnnotation.dragDelta.subscribe(updateMarkers);
+  boxAnnotation.selectedChanged.subscribe(onSelected);
+
+  (boxAnnotation as any).markers = [x1Marker, x2Marker, y1Marker, y2Marker];
+
   sciChartSurface.annotations.add(boxAnnotation);
+  sciChartSurface.annotations.add(y1Marker);
+  sciChartSurface.annotations.add(y2Marker);
+  sciChartSurface.annotations.add(x1Marker);
+  sciChartSurface.annotations.add(x2Marker);
 
-  const renderableSeries = sciChartSurface.renderableSeries.get(0);
-  if (!renderableSeries || !renderableSeries.dataSeries) return;
-
-  const dataSeries = renderableSeries.dataSeries as OhlcDataSeries;
-
-  attachStatsTooltip(sciChartSurface, boxAnnotation, dataSeries, xAxis, yAxis);
+  return {
+    boxAnnotation,
+    markers: {
+      y1Marker,
+      y2Marker,
+      x1Marker,
+      x2Marker,
+    },
+  };
 };

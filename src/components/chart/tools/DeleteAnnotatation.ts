@@ -8,6 +8,9 @@ export const deleteSelectedAnnotations = (sciChartSurface: SciChartSurface) => {
     const annotation = annotations.get(i);
     if (annotation.isSelected) {
       toRemove.push(annotation);
+      if ((annotation as any).markers) {
+        toRemove.push(...(annotation as any).markers);
+      }
     }
   }
 

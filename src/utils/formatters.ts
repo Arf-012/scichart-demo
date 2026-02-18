@@ -10,3 +10,11 @@ export const formatDuration = (ms: number): string => {
   if (ms >= 3600000) return (ms / 3600000).toFixed(1) + "h";
   return (ms / 60000).toFixed(0) + "m";
 };
+
+export const formatPrice = (price: number): string => {
+  return "$" + new Intl.NumberFormat("en-US").format(price);
+};
+
+export const formatDate = (date: number): string => {
+  return new Date(date * 1000).toLocaleDateString("id-ID");
+};

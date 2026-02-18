@@ -46,6 +46,25 @@ export default function RealtimeTickingStockCharts() {
     }
   };
 
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const activeElement = document.activeElement as HTMLElement;
+      const isInput =
+        activeElement.tagName === "INPUT" ||
+        activeElement.tagName === "TEXTAREA" ||
+        activeElement.isContentEditable;
+
+      if ((event.key === "Delete" || event.key === "Backspace") && !isInput) {
+        chartControlsRef.current?.deleteSelectedAnnotations();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const initFunc = createChartInitializer(providerId);
 
   return (
