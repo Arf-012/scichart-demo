@@ -5,9 +5,14 @@ import {
   PinchZoomModifier,
   AnnotationHoverModifier,
   EXyDirection,
+  LegendModifier,
+  ELegendPlacement,
+  ELegendOrientation,
+  TLegendItem,
 } from "scichart";
 import { SelectionModifier } from "../features/SelectionModifier";
 import { createCursorModifier } from "../tools/Cursor";
+import { appTheme } from "../../../styles/theme";
 
 export const configureModifiers = (sciChartSurface: SciChartSurface) => {
   const zoomPanModifier = new ZoomPanModifier({ enableZoom: true });
@@ -26,6 +31,7 @@ export const configureModifiers = (sciChartSurface: SciChartSurface) => {
     selectionModifier,
     cursorModifier.cursorModifier,
     cursorModifier.rolloverModifier,
+    cursorModifier.legendModifier,
 
     new MouseWheelZoomModifier(),
     new AnnotationHoverModifier(),
@@ -35,6 +41,7 @@ export const configureModifiers = (sciChartSurface: SciChartSurface) => {
     zoomPanModifier,
     cursorModifier: cursorModifier.cursorModifier,
     rolloverModifier: cursorModifier.rolloverModifier,
+    legendModifier: cursorModifier.legendModifier,
     selectionModifier,
   };
 };

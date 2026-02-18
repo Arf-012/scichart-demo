@@ -37,7 +37,15 @@ export const toggleCursor = (
   modifiers: { [key: string]: ChartModifierBase2D },
   isEnabled: boolean,
 ) => {
-  const { cursorModifier, rolloverModifier } = modifiers;
+  const { cursorModifier, rolloverModifier, legendModifier } = modifiers;
   if (cursorModifier) cursorModifier.isEnabled = isEnabled;
   if (rolloverModifier) rolloverModifier.isEnabled = isEnabled;
+  if (legendModifier) legendModifier.isEnabled = isEnabled;
+
+  if (!isEnabled) {
+    const legendEl = document.getElementById("legend-ohlc-value");
+    if (legendEl) {
+      legendEl.innerHTML = "";
+    }
+  }
 };

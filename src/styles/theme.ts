@@ -41,6 +41,7 @@ export class SciChart2022AppTheme implements AppThemeBase {
   TV_Green = "#089981";
   TV_Red = "#F23645";
   TV_Cursor = "#9598A1";
+  LegendText = "#787B86";
 
   ForegroundColor = "#D1D4DC";
   Background = this.TV_Background;

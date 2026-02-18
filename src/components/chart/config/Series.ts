@@ -12,7 +12,9 @@ export const configureSeries = (
   sciChartSurface: SciChartSurface,
   wasmContext: TSciChart,
 ) => {
-  const candleDataSeries = new OhlcDataSeries(wasmContext);
+  const candleDataSeries = new OhlcDataSeries(wasmContext, {
+    dataSeriesName: "BTC/USDT",
+  });
 
   const candlestickSeries = new FastCandlestickRenderableSeries(wasmContext, {
     dataSeries: candleDataSeries,
@@ -21,38 +23,45 @@ export const configureSeries = (
     brushDown: appTheme.TV_Red,
     strokeUp: appTheme.TV_Green,
     strokeDown: appTheme.TV_Red,
+    id: "candlestick-series",
   });
 
   candlestickSeries.rolloverModifierProps.tooltipLegendTemplate = (
     tooltipProps: any,
     seriesInfo: any,
   ) => {
-    const ohlc = seriesInfo;
-    if (!ohlc || !ohlc.openValue) {
-      return "";
+    const display = "flex";
+    let str = "";
+
+    if (seriesInfo && seriesInfo.openValue) {
+      const open = seriesInfo.openValue.toFixed(2);
+      const high = seriesInfo.highValue.toFixed(2);
+      const low = seriesInfo.lowValue.toFixed(2);
+      const close = seriesInfo.closeValue.toFixed(2);
+      const change = seriesInfo.closeValue - seriesInfo.openValue;
+      const percentChange = ((change / seriesInfo.openValue) * 100).toFixed(2);
+      const color = change >= 0 ? appTheme.TV_Green : appTheme.TV_Red;
+      const labelColor = "#787B86";
+
+      str = `
+        <div style="display: flex; gap: 10px; font-family: Roboto; font-size: 13px;">
+            <span style="color: ${labelColor}">O <span style="color: ${color}">${open}</span></span>
+            <span style="color: ${labelColor}">H <span style="color: ${color}">${high}</span></span>
+            <span style="color: ${labelColor}">L <span style="color: ${color}">${low}</span></span>
+            <span style="color: ${labelColor}">C <span style="color: ${color}">${close}</span></span>
+            <span style="color: ${color}">
+               ${change >= 0 ? "+" : ""}${change.toFixed(2)} (${change >= 0 ? "+" : ""}${percentChange}%)
+            </span>
+        </div>
+      `;
     }
 
-    const open = ohlc.openValue.toFixed(2);
-    const high = ohlc.highValue.toFixed(2);
-    const low = ohlc.lowValue.toFixed(2);
-    const close = ohlc.closeValue.toFixed(2);
-    const change = ohlc.closeValue - ohlc.openValue;
-    const percentChange = ((change / ohlc.openValue) * 100).toFixed(2);
-    const color = change >= 0 ? appTheme.TV_Green : appTheme.TV_Red;
-    const labelColor = "#787B86";
+    const legendEl = document.getElementById("legend-ohlc-value");
+    if (legendEl) {
+      legendEl.innerHTML = str;
+    }
 
-    return `
-      <svg width="100%" height="30">
-        <text x="5" y="20" font-size="13" font-family="Roboto" fill="${appTheme.VividSkyBlue}">${seriesInfo.seriesName}</text>
-        <text x="80" y="20" font-size="13" font-family="Roboto" fill="${labelColor}">O <tspan fill="${color}">${open}</tspan></text>
-        <text x="160" y="20" font-size="13" font-family="Roboto" fill="${labelColor}">H <tspan fill="${color}">${high}</tspan></text>
-        <text x="240" y="20" font-size="13" font-family="Roboto" fill="${labelColor}">L <tspan fill="${color}">${low}</tspan></text>
-        <text x="320" y="20" font-size="13" font-family="Roboto" fill="${labelColor}">C <tspan fill="${color}">${close}</tspan></text>
-        <text x="400" y="20" font-size="13" font-family="Roboto" fill="${color}">
-           ${change >= 0 ? "+" : ""}${change.toFixed(2)} (${change >= 0 ? "+" : ""}${percentChange}%)
-        </text>
-      </svg>
-    `;
+    return "";
   };
 
   sciChartSurface.renderableSeries.add(candlestickSeries);
