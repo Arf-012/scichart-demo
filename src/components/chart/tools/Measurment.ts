@@ -28,11 +28,9 @@ export class SelectionModifier extends ChartModifierBase2D {
   private hLine: LineAnnotation | undefined;
   private vLine: LineAnnotation | undefined;
 
-  // Tambahkan 2 anotasi untuk kepala panah
   private hArrow: CustomAnnotation | undefined;
   private vArrow: CustomAnnotation | undefined;
 
-  // Markers
   private x1Marker: AxisMarkerAnnotation | undefined;
   private x2Marker: AxisMarkerAnnotation | undefined;
   private y1Marker: AxisMarkerAnnotation | undefined;
@@ -51,7 +49,6 @@ export class SelectionModifier extends ChartModifierBase2D {
 
       const themeColor = appTheme.VividSkyBlue;
 
-      // 1. Box Annotation
       this.activeBox = new BoxAnnotation({
         xCoordinateMode: ECoordinateMode.Pixel,
         yCoordinateMode: ECoordinateMode.Pixel,
@@ -65,7 +62,6 @@ export class SelectionModifier extends ChartModifierBase2D {
         annotationLayer: EAnnotationLayer.AboveChart,
       });
 
-      // 2. Horizontal & Vertical Lines
       this.hLine = new LineAnnotation({
         xCoordinateMode: ECoordinateMode.Pixel,
         yCoordinateMode: ECoordinateMode.Pixel,
@@ -82,7 +78,6 @@ export class SelectionModifier extends ChartModifierBase2D {
         annotationLayer: EAnnotationLayer.AboveChart,
       });
 
-      // 3. Arrow Heads (SVG)
       this.hArrow = new CustomAnnotation({
         xCoordinateMode: ECoordinateMode.Pixel,
         yCoordinateMode: ECoordinateMode.Pixel,
@@ -99,7 +94,6 @@ export class SelectionModifier extends ChartModifierBase2D {
         annotationLayer: EAnnotationLayer.AboveChart,
       });
 
-      // 4. Axis Markers
       const xCalc = this.parentSurface.xAxes
         .get(0)
         .getCurrentCoordinateCalculator();
@@ -131,7 +125,6 @@ export class SelectionModifier extends ChartModifierBase2D {
   public modifierMouseMove(args: ModifierMouseArgs): void {
     super.modifierMouseMove(args);
 
-    // Saat sedang menarik (drag)
     if (
       this.startPoint &&
       this.activeBox &&
@@ -156,11 +149,9 @@ export class SelectionModifier extends ChartModifierBase2D {
       const midX = minX + (maxX - minX) / 2;
       const midY = minY + (maxY - minY) / 2;
 
-      // Cek arah drag untuk mirror panah
       const isRight = cx >= sx;
       const isDown = cy >= sy;
 
-      // Update Lines
       this.hLine.x1 = minX;
       this.hLine.x2 = maxX;
       this.hLine.y1 = midY;
@@ -173,19 +164,16 @@ export class SelectionModifier extends ChartModifierBase2D {
 
       const themeColor = appTheme.VividSkyBlue;
 
-      // Update H-Arrow (Rotasi 0 jika ke kanan, 180 jika ke kiri)
       this.hArrow.x1 = isRight ? maxX : minX;
       this.hArrow.y1 = midY;
       const hRot = isRight ? 0 : 180;
       this.hArrow.svgString = `<svg width="10" height="10" overflow="visible"><polygon points="0,0 10,5 0,10" fill="${themeColor}" transform="rotate(${hRot} 5 5)"/></svg>`;
 
-      // Update V-Arrow (Rotasi 90 jika ke bawah, 270 jika ke atas)
       this.vArrow.x1 = midX;
       this.vArrow.y1 = isDown ? maxY : minY;
       const vRot = isDown ? 90 : 270;
       this.vArrow.svgString = `<svg width="10" height="10" overflow="visible"><polygon points="0,0 10,5 0,10" fill="${themeColor}" transform="rotate(${vRot} 5 5)"/></svg>`;
 
-      // Update Markers
       const xCalc = this.parentSurface.xAxes
         .get(0)
         .getCurrentCoordinateCalculator();
@@ -212,7 +200,6 @@ export class SelectionModifier extends ChartModifierBase2D {
       this.updateSmartTooltip(this.activeBox);
     }
 
-    // Saat sekadar hover box yang sudah jadi
     if (!this.startPoint && this.activeBox) {
       this.updateSmartTooltip(this.activeBox);
     }
@@ -231,7 +218,6 @@ export class SelectionModifier extends ChartModifierBase2D {
         this.clearSelection();
         this.updateSmartTooltip(undefined, args.mousePoint);
       } else if (this.activeBox) {
-        // Konversi semua elemen (Box, Garis, Panah) menjadi Mode DataValue agar menempel pada chart
         const xCalc = this.parentSurface.xAxes
           .get(0)
           .getCurrentCoordinateCalculator();
@@ -242,7 +228,6 @@ export class SelectionModifier extends ChartModifierBase2D {
         const toDataX = (pix: number) => xCalc.getDataValue(pix);
         const toDataY = (pix: number) => yCalc.getDataValue(pix);
 
-        // List anotasi dengan properti x1, y1, x2, y2
         [this.activeBox, this.hLine, this.vLine].forEach((ann) => {
           if (ann) {
             ann.x1 = toDataX(ann.x1);
@@ -254,7 +239,6 @@ export class SelectionModifier extends ChartModifierBase2D {
           }
         });
 
-        // List anotasi Custom yang hanya memiliki x1, y1 (Anotasi Panah SVG)
         [this.hArrow, this.vArrow].forEach((ann) => {
           if (ann) {
             ann.x1 = toDataX(ann.x1);
@@ -264,10 +248,8 @@ export class SelectionModifier extends ChartModifierBase2D {
           }
         });
 
-        // Kunci Tooltip
         this.updateSmartTooltip(this.activeBox);
 
-        // Bind markers to box
         const box = this.activeBox;
         const x1M = this.x1Marker;
         const x2M = this.x2Marker;
