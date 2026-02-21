@@ -16,7 +16,7 @@ export default defineConfig({
       ],
       workbox: {
         sourcemap: true,
-        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        globPatterns: ["**/*.{css,html,png,svg}"],
         maximumFileSizeToCacheInBytes: 5242880,
       },
       manifest: {
