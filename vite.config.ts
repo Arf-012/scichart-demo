@@ -9,10 +9,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       injectRegister: "auto",
       includeAssets: [
-        "favicon.ico",
-        "apple-touch-icon.png",
-        "mask-icon.svg",
-        "Logo.png",
+        "btc.svg",
       ],
       workbox: {
         sourcemap: true,
@@ -26,14 +23,14 @@ export default defineConfig({
         theme_color: "#131722",
         icons: [
           {
-            src: "Logo.png",
+            src: "btc.svg",
             sizes: "192x192",
-            type: "image/png",
+            type: "image/svg",
           },
           {
-            src: "Logo.png",
+            src: "btc.svg",
             sizes: "512x512",
-            type: "image/png",
+            type: "image/svg",
           },
         ],
       },
