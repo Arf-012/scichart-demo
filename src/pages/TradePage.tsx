@@ -39,7 +39,7 @@ export default function TradePage() {
 
   const [providerId, setProviderId] = useState<string>("random");
   const [activePeriod, setActivePeriod] = useState<string>("1D");
-  const [activeTool, setActiveTool] = useState<string>("pan");
+  const [activeTool, setActiveTool] = useState<string>("crosshair");
   const [isCursorEnabled, setIsCursorEnabled] = useState<boolean>(false);
 
   // Legend state — updated directly from SciChart rollover callback

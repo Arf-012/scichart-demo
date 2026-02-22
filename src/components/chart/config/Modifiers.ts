@@ -7,10 +7,13 @@ import {
   EXyDirection,
 } from "scichart";
 import { Measurment } from "../tools/Measurment";
+import { CrosshairTool } from "../utils/Custom/Crosshair";
 import { createCursorModifier } from "../tools/Cursor";
 
 export const configureModifiers = (sciChartSurface: SciChartSurface) => {
   const zoomPanModifier = new ZoomPanModifier({ enableZoom: true });
+  zoomPanModifier.isEnabled = false;
+
   const pinchZoomModifier = new PinchZoomModifier({
     xyDirection: EXyDirection.XyDirection,
   });
@@ -22,8 +25,13 @@ export const configureModifiers = (sciChartSurface: SciChartSurface) => {
   (pinchZoomModifier as any).scaleFactor = 0.0005;
 
   const measurmentModifier = new Measurment();
+  measurmentModifier.isEnabled = false;
+
+  const crosshairTool = new CrosshairTool();
+  crosshairTool.isEnabled = true;
 
   sciChartSurface.chartModifiers.add(
+    crosshairTool,
     zoomPanModifier,
     pinchZoomModifier,
     mouseWheelZoomModifier,
@@ -34,6 +42,7 @@ export const configureModifiers = (sciChartSurface: SciChartSurface) => {
   );
 
   return {
+    crosshairTool,
     zoomPanModifier,
     cursorModifier: cursorModifier.cursorModifier,
     rolloverModifier: cursorModifier.rolloverModifier,
